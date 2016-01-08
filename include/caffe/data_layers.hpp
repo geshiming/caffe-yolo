@@ -263,7 +263,7 @@ class ImageDataLayer : public BasePrefetchingDataLayer<Dtype> {
 * TODO(dox): thorough documentation for Forward and proto params.
 */
 template <typename Dtype>
-class YoloDataLayer : public BasePrefetchingDataLayer {
+class YoloDataLayer : public BasePrefetchingDataLayer<Dtype> {
 public:
 	explicit YoloDataLayer(const LayerParameter& param)
 		: BasePrefetchingDataLayer<Dtype>(param) {}
