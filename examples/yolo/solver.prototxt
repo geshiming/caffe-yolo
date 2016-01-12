@@ -1,7 +1,7 @@
-net: "/data/yolo_vgg_16_train_val_coco.prototxt"
+net: "/home/zhangz/dev/caffe/examples/yolo/yolo_vgg_16_train_val_coco.prototxt"
 test_iter: 1000
 test_interval: 1000
-base_lr: 0.00001
+base_lr: 0.001
 momentum: 0.9
 weight_decay: 0.0005
 # The learning rate policy
@@ -9,5 +9,5 @@ lr_policy: "fixed"
 display: 100
 max_iter: 400000
 snapshot: 1000
-snapshot_prefix: "/data/ImageNet/vgg_160_train_val"
-solver_mode: GPU
+snapshot_prefix: "/home/zhangz/dev/caffe/examples/yolo/vgg_160_train_val"
+solver_mode: CPU

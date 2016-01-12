@@ -268,7 +268,7 @@ public:
 	explicit YoloDataLayer(const LayerParameter& param)
 		: BasePrefetchingDataLayer<Dtype>(param) {}
 	virtual ~YoloDataLayer();
-	virtual void DataLayerSetup(const vector<Blob<Dtype>*>& bottom,
+	virtual void DataLayerSetUp(const vector<Blob<Dtype>*>& bottom,
 		const vector<Blob<Dtype>*>& top);
 
 	virtual inline const char* type() const { return "YoloData"; }

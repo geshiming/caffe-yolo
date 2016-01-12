@@ -74,3 +74,5 @@ caffe_print_configuration_summary()
 
 # ---[ Export configs generation
 caffe_generate_export_configs()
+
+set(CMAKE_BUILD_TYPE "Debug")

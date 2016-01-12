@@ -72,6 +72,8 @@ void Net<Dtype>::Init(const NetParameter& in_param) {
     const int layer_id = -1;  // inputs have fake layer ID -1
     AppendTop(param, layer_id, input_id, &available_blobs, &blob_name_to_idx);
   }
+  int break_point = 0;
+  LOG(INFO) << "Break point" << break_point++;
   // For each layer, set up its input and output
   bottom_vecs_.resize(param.layer_size());
   top_vecs_.resize(param.layer_size());
@@ -118,6 +120,7 @@ void Net<Dtype>::Init(const NetParameter& in_param) {
     int num_top = layer_param.top_size();
     for (int top_id = 0; top_id < num_top; ++top_id) {
       AppendTop(param, layer_id, top_id, &available_blobs, &blob_name_to_idx);
+      LOG(INFO) << "num top " << num_top;
     }
     // If the layer specifies that AutoTopBlobs() -> true and the LayerParameter
     // specified fewer than the required number (as specified by
@@ -145,7 +148,9 @@ void Net<Dtype>::Init(const NetParameter& in_param) {
             << layer_param.name();
       }
     } else {
+      LOG(INFO) << "set up layer " << layer_id;
       layers_[layer_id]->SetUp(bottom_vecs_[layer_id], top_vecs_[layer_id]);
+      LOG(INFO) << "set up layer finished " << layer_id;
     }
     LOG_IF(INFO, Caffe::root_solver())
         << "Setting up " << layer_names_[layer_id];
@@ -390,6 +395,7 @@ void Net<Dtype>::AppendTop(const NetParameter& param, const int layer_id,
   const string& blob_name = layer_param ?
       (layer_param->top_size() > top_id ?
           layer_param->top(top_id) : "(automatic)") : param.input(top_id);
+  LOG(INFO) << "Append blob " << blob_name;
   // Check if we are doing in-place computation
   if (blob_name_to_idx && layer_param && layer_param->bottom_size() > top_id &&
       blob_name == layer_param->bottom(top_id)) {
@@ -437,6 +443,7 @@ void Net<Dtype>::AppendTop(const NetParameter& param, const int layer_id,
     }
   }
   if (available_blobs) { available_blobs->insert(blob_name); }
+  LOG(INFO) << "Blob appended " << blob_name;
 }
 
 // Helper for Net::Init: add a new bottom blob to the net.

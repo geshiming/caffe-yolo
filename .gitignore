@@ -3,3 +3,5 @@ caffe.kdev4
 build/*
 *.so
 Makefile.config
+Makefile
+CMakeLists.txt

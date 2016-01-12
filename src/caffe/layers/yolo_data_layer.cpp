@@ -24,7 +24,7 @@ caffe::YoloDataLayer<Dtype>::~YoloDataLayer() {
 }
 
 template <typename Dtype>
-void caffe::YoloDataLayer<Dtype>::DataLayerSetup(const vector<Blob<Dtype>*>& bottom,
+void caffe::YoloDataLayer<Dtype>::DataLayerSetUp(const vector<Blob<Dtype>*>& bottom,
 						 const vector<Blob<Dtype>*>& top) {
   const int new_height = this->layer_param_.yolo_data_param().new_height();
   const int new_width = this->layer_param_.yolo_data_param().new_width();
