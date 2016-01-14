@@ -148,6 +148,12 @@ void caffe::YoloDataLayer<Dtype>::load_batch(Batch<Dtype>* batch) {
 
   Dtype* prefetch_data = batch->data_.mutable_cpu_data();
   Dtype* prefetch_label = batch->label_.mutable_cpu_data();
+  for (int i = 0; i < batch->data_.count(); i++) {
+    prefetch_data[i] = 0;
+  }
+  for (int i = 0; i < batch->label_.count(); i++) {
+    prefetch_label[i] = 0;
+  }
 
   // datum scales
   // for each image, bounding box transformation is not implemented
