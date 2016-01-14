@@ -1,3 +1,4 @@
+#ifdef USE_OPENCV
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
@@ -94,7 +95,7 @@ void caffe::YoloDataLayer<Dtype>::DataLayerSetUp(const vector<Blob<Dtype>*>& bot
   const int num_sides = this->layer_param_.yolo_data_param().num_sides();
   vector<int> label_shape(4);
   label_shape[0] = batch_size;
-  label_shape[1] = num_predictions * 5;	//4 for coordinates and 1 for class label
+  label_shape[1] = 5;	//4 for coordinates and 1 for class label
   label_shape[2] = num_sides;
   label_shape[3] = num_sides;
   top[1]->Reshape(label_shape);
@@ -140,7 +141,7 @@ void caffe::YoloDataLayer<Dtype>::load_batch(Batch<Dtype>* batch) {
   const int num_sides = this->layer_param_.yolo_data_param().num_sides();
   vector<int> label_shape(4);
   label_shape[0] = batch_size;
-  label_shape[1] = num_predictions * 5;	
+  label_shape[1] = 5;	
   label_shape[2] = num_sides;
   label_shape[3] = num_sides;
   batch->label_.Reshape(label_shape);
@@ -179,15 +180,16 @@ void caffe::YoloDataLayer<Dtype>::load_batch(Batch<Dtype>* batch) {
       int grid_y = floor(box_coord[1] * num_sides);
       
       // Set label to blob
-      offset = batch->label_.offset(item_id, 0, grid_x, grid_y);
+      offset = batch->label_.offset(item_id, 0, grid_y, grid_x);
       prefetch_label[offset] = label;
 
       // Set truth box to blob
       for (int coord_id = 0; coord_id < 4; coord_id++) {
-	offset = batch->label_.offset(item_id, coord_id, grid_x, grid_y);
+	offset = batch->label_.offset(item_id, coord_id+1, grid_y, grid_x);
 	prefetch_label[offset] = box_coord[coord_id];
       }
-    }    
+    }
+
     trans_time += timer.MicroSeconds();
 
     // go to the next iter
@@ -211,20 +213,20 @@ template <typename Dtype>
 void caffe::YoloDataLayer<Dtype>::GetLabels(vector<float* >& box_coords, vector<int> &box_label) {
   std::string truth_box = lines_[lines_id_].second;
   while (truth_box.find(']') != -1) {
-  std::string str_box = truth_box.substr(1, truth_box.find(']') - 1);
-  float box_coord[4];
-  for (int i = 0; i < 3; i++) {
-    box_coord[i] = atof(str_box.substr(0, str_box.find(',')).c_str());
-    str_box = str_box.substr(str_box.find(' ') + 1, str_box.length());
-  }
-  box_coord[3] = atof(str_box.c_str());
-  box_coords.push_back(box_coord);
+    std::string str_box = truth_box.substr(1, truth_box.find(']') - 1);
+    float *box_coord = new float[4];
+    for (int i = 0; i < 3; i++) {
+      box_coord[i] = atof(str_box.substr(0, str_box.find(',')).c_str());
+      str_box = str_box.substr(str_box.find(' ') + 1, str_box.length());
+    }
+    box_coord[3] = atof(str_box.c_str());
+    box_coords.push_back(box_coord);
 
-  truth_box = truth_box.substr(truth_box.find(']') + 2, truth_box.length());
-  std::string str_label = truth_box.substr(0, truth_box.find(' '));
-  box_label.push_back(atoi(str_label.c_str()));
+    truth_box = truth_box.substr(truth_box.find(']') + 2, truth_box.length());
+    std::string str_label = truth_box.substr(0, truth_box.find(' '));
+    box_label.push_back(atoi(str_label.c_str()));
 
-  truth_box = truth_box.substr(truth_box.find(' ') + 1, truth_box.length());
+    truth_box = truth_box.substr(truth_box.find(' ') + 1, truth_box.length());
   }
 }
 
@@ -262,3 +264,4 @@ void caffe::YoloDataLayer<Dtype>::ReadYoloImages(const string& filename,
 INSTANTIATE_CLASS(YoloDataLayer);
 REGISTER_LAYER_CLASS(YoloData);
 }
+#endif  // USE_OPENCV
