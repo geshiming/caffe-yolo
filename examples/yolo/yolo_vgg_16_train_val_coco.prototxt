@@ -504,6 +504,31 @@ layer {
   }
 }
 layer {
+  name: "bbox_prediction"
+  bottom: "fc7"
+  top: "bbox_prediction"
+  type: "Convolution"
+  convolution_param {
+    num_output: 4
+    kernel_size: 1
+    weight_filler {
+      type: "xavier"
+    }
+    bias_filler {
+      type: "constant"
+      value: 0.2
+    }
+  }
+  param {
+    lr_mult: 1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 2
+    decay_mult: 0
+  }
+}
+layer {
   name: "label_truth"
   bottom: "label"
   top: "label_truth"
@@ -514,11 +539,18 @@ layer {
   }
 }
 layer {
-  name: "loss"
+  name: "class_loss"
   type: "SoftmaxWithLoss"
   bottom: "label_prediction"
   bottom: "label_truth"
-  top: "loss/loss"
+  top: "class/loss"
+}
+layer {
+  name: "bbox_loss"
+  type: "EuclideanLoss"
+  bottom: "bbox_prediction"
+  bottom: "bbox_truth"
+  top: "bbox/loss"
 }
 layer {
   name: "accuracy"
