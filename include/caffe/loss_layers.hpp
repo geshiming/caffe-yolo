@@ -4,6 +4,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <boost/concept_check.hpp>
 
 #include "caffe/blob.hpp"
 #include "caffe/common.hpp"
@@ -43,7 +44,7 @@ class AccuracyLayer : public Layer<Dtype> {
   // If there are two top blobs, then the second blob will contain
   // accuracies per class.
   virtual inline int MinTopBlobs() const { return 1; }
-  virtual inline int MaxTopBlos() const { return 2; }
+  virtual inline int MaxTopBlobs() const { return 2; }
 
  protected:
   /**
@@ -92,6 +93,43 @@ class AccuracyLayer : public Layer<Dtype> {
   int ignore_label_;
   /// Keeps counts of the number of samples per class.
   Blob<Dtype> nums_buffer_;
+};
+
+template <typename Dtype>
+class MultiAccuracyLayer : public Layer<Dtype> {
+public:
+  explicit MultiAccuracyLayer(const LayerParameter& param)
+      : Layer<Dtype>(param) {}
+  virtual void LayerSetUp(const vector<Blob<Dtype>*>& bottom,
+      const vector<Blob<Dtype>*>& top);
+  virtual void Reshape(const vector<Blob<Dtype>*>& bottom,
+      const vector<Blob<Dtype>*>& top);
+
+  virtual inline const char* type() const { return "MultiAccuracy"; }
+  virtual inline int ExactNumBottomBlobs() const { return 2; }
+
+  virtual inline int MinTopBlobs() const { return 1; }
+  virtual inline int MaxTopBlobs() const { return 1; }
+
+protected:
+  virtual void Forward_cpu(const vector<Blob<Dtype>*>& bottom,
+      const vector<Blob<Dtype>*>& top);
+
+  virtual void Backward_cpu(const vector<Blob<Dtype>*>& top,
+      const vector<bool>& propagate_down, const vector<Blob<Dtype>*>& bottom) {
+    for (int i = 0; i < propagate_down.size(); ++i) {
+      if (propagate_down[i]) { NOT_IMPLEMENTED; }
+    }
+  }
+
+  shared_ptr<Layer<Dtype> > softmax_layer_;
+  Blob<Dtype> prob_;
+  vector<Blob<Dtype>*> softmax_bottom_vec_;
+  vector<Blob<Dtype>*> softmax_top_vec_;
+
+  int label_axis_, outer_num_, inner_num_;
+  bool has_ignore_label_;
+  int ignore_label_;
 };
 
 /**
@@ -765,6 +803,43 @@ class SoftmaxWithLossLayer : public LossLayer<Dtype> {
   /// (otherwise just by the batch size).
   bool normalize_;
 
+  int softmax_axis_, outer_num_, inner_num_;
+};
+
+template <typename Dtype>
+class MultiSoftmaxWithLossLayer : public LossLayer<Dtype> {
+public:
+  explicit MultiSoftmaxWithLossLayer(const LayerParameter& param)
+      : LossLayer<Dtype>(param) {}
+  virtual void LayerSetUp(const vector<Blob<Dtype>*>& bottom,
+      const vector<Blob<Dtype>*>& top);
+  virtual void Reshape(const vector<Blob<Dtype>*>& bottom, 
+      const vector<Blob<Dtype>*>& top);
+  
+  virtual inline const char* type() const { return "MultiSoftmaxWithLoss"; }
+  virtual inline int ExactNumTopBlobs() const { return -1; }
+  virtual inline int MinTopBlobs() const { return 1; }
+  virtual inline int MaxTopBlobs() const { return 2; }
+  
+protected:
+  virtual void Forward_cpu(const vector<Blob<Dtype>*>& bottom, 
+      const vector<Blob<Dtype>*>& top);
+  virtual void Forward_gpu(const vector<Blob<Dtype>*>& bottom,
+      const vector<Blob<Dtype>*>& top);
+  
+  virtual void Backward_cpu(const vector<Blob<Dtype>*>& top,
+      const vector<bool>& propagate_down, const vector<Blob<Dtype>*>& bottom);
+  virtual void Backward_gpu(const vector<Blob<Dtype>*>& top,
+      const vector<bool>& propagate_down, const vector<Blob<Dtype>*>& bottom);
+
+  shared_ptr<Layer<Dtype> > softmax_layer_;
+  Blob<Dtype> prob_;
+  vector<Blob<Dtype>*> softmax_bottom_vec_;
+  vector<Blob<Dtype>*> softmax_top_vec_;
+  bool has_ignore_label_;
+  int ignore_label_;
+  bool normalize_;
+  
   int softmax_axis_, outer_num_, inner_num_;
 };
 

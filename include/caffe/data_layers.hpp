@@ -258,6 +258,35 @@ class ImageDataLayer : public BasePrefetchingDataLayer<Dtype> {
 
 
 /**
+ * @brief Provides data with multi-class to the Net from image files.
+ *
+ * TODO(dox): thorough documentation for Forward and proto params.
+ */
+template <typename Dtype>
+class MultiImageDataLayer : public BasePrefetchingDataLayer<Dtype> {
+ public:
+  explicit MultiImageDataLayer(const LayerParameter& param)
+      : BasePrefetchingDataLayer<Dtype>(param) {}
+  virtual ~MultiImageDataLayer();
+  virtual void DataLayerSetUp(const vector<Blob<Dtype>*>& bottom,
+      const vector<Blob<Dtype>*>& top);
+
+  virtual inline const char* type() const { return "ImageData"; }
+  virtual inline int ExactNumBottomBlobs() const { return 0; }
+  virtual inline int ExactNumTopBlobs() const { return 2; }
+
+ protected:
+  shared_ptr<Caffe::RNG> prefetch_rng_;
+  virtual void ShuffleImages();
+  virtual void load_batch(Batch<Dtype>* batch);
+  void GetLabels(vector<float* >& box_coords, vector<int> &box_label);
+
+  vector<std::pair<std::string, std::string> > lines_;
+  int lines_id_;
+};
+
+
+/**
 * @brief Provides image data and bounding box to the Net from image data.
 *
 * TODO(dox): thorough documentation for Forward and proto params.
