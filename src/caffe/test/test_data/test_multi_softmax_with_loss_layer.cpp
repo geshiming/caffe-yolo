@@ -30,7 +30,7 @@ protected:
     FillerParameter filler_param;
     filler_param.set_std(10);
     GaussianFiller<Dtype> filler(filler_param);
-    filler.Fill(blob_bottom_data_);
+    filler.Fill(this->blob_bottom_data_);
     blob_bottom_vec_.push_back(blob_bottom_data_);
     for (int i = 0; i < blob_bottom_label_->count(); ++i) {
       blob_bottom_label_->mutable_cpu_data()[i] = caffe_rng_rand() % 2;
@@ -56,7 +56,7 @@ TYPED_TEST(MultiSoftmaxWithLossLayerTest, TestGradient) {
   typedef typename TypeParam::Dtype Dtype;
   LayerParameter layer_param;
   layer_param.add_loss_weight(3);
-  MultiSoftmaxWithLossLayerTest<Dtype> layer(layer_param);
+  MultiSoftmaxWithLossLayer<Dtype> layer(layer_param);
   GradientChecker<Dtype> checker(1e-2, 1e-2, 1701);
   checker.CheckGradientExhaustive(&layer, this->blob_bottom_vec_,
       this->blob_top_vec_, 0);

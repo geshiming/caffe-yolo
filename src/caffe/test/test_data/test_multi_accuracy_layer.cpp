@@ -64,7 +64,7 @@ TYPED_TEST_CASE(MultiAccuracyLayerTest, TestDtypes);
 
 TYPED_TEST(MultiAccuracyLayerTest, TestSetup) {
   LayerParameter layer_param;
-  MultiAccuracyLayerTest<TypeParam> layer(layer_param);
+  MultiAccuracyLayer<TypeParam> layer(layer_param);
   layer.SetUp(this->blob_bottom_vec_, this->blob_top_vec_);
   EXPECT_EQ(this->blob_top_->num(), 1);
   EXPECT_EQ(this->blob_top_->channels(), 1);
