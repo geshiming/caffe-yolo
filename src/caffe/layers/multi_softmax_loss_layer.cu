@@ -72,7 +72,7 @@ __global__ void MultiSoftmaxLossBackwardGPU(const int nthreads, const Dtype* lab
       int label_index = n * dim + c * spatial_dim + s;
       if (label[label_index] == 1 && c != ignore_label_) {
 	bottom_diff[label_index] -= 1;
-	++count;
+	counts[label_index] = 1;
 	ignored = false;
       } else if (label[label_index] == 1 && c == ignore_label_) {
 	bottom_diff[label_index] = 0;
