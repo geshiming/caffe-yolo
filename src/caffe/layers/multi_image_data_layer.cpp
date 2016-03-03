@@ -86,7 +86,9 @@ void MultiImageDataLayer<Dtype>::DataLayerSetUp(const vector<Blob<Dtype>*>& bott
       << top[0]->width();
   // label
   int label_num = this->layer_param_.multi_image_data_param().class_num();
-  vector<int> label_shape(label_num, batch_size);
+  vector<int> label_shape;
+  label_shape.push_back(label_num);
+  label_shape.push_back(batch_size);
   top[1]->Reshape(label_shape);
   for (int i = 0; i < this->PREFETCH_COUNT; ++i) {
     this->prefetch_[i].label_.Reshape(label_shape);
