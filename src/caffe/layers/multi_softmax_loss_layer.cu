@@ -67,22 +67,22 @@ __global__ void MultiSoftmaxLossBackwardGPU(const int nthreads, const Dtype* lab
   CUDA_KERNEL_LOOP(index, nthreads) {
     const int n = index / spatial_dim;
     const int s = index % spatial_dim;
-    bool ignored = true;
+    int truth_count = 0;
+    for (int c = 0; c < channels; ++c) {
+      if (label[n * dim + c * spatial_dim + s] == 1 && c != ignore_label_) {
+	truth_count++;
+      }
+    }
+
     for (int c = 0; c < channels; ++c) {
       int label_index = n * dim + c * spatial_dim + s;
+      bottom_diff[label_index] *= truth_count;
       if (label[label_index] == 1 && c != ignore_label_) {
 	bottom_diff[label_index] -= 1;
 	counts[label_index] = 1;
-	ignored = false;
-      } else if (label[label_index] == 1 && c == ignore_label_) {
-	bottom_diff[label_index] = 0;
       }
     }
-    if (ignored == true) {
-      for (int c = 0; c < channels; ++c) {
-	bottom_diff[n * dim + c * spatial_dim + s] = 0;
-      }
-    }
+
   }
 }
 

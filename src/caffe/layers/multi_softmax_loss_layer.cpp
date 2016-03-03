@@ -98,20 +98,17 @@ void MultiSoftmaxWithLossLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype>*>& 
     int count = 0;
     for (int i = 0; i < outer_num_; ++i) {
       for (int j = 0; j < inner_num_; ++j) {
-	bool ignored = true;
+	int truth_count = 0;
 	for (int k = 0; k < label_num; k++) {
-	  if (label[i * dim + k * inner_num_ + j] == 1 &&
-	    (has_ignore_label_ && k == ignore_label_)) {
-	    bottom_diff[i * dim + k * inner_num_ + j] = 0;
-	  } else if (label[i * dim + k * inner_num_ + j] == 1) {
-	    bottom_diff[i * dim + k * inner_num_ + j] -= 1;
-	    ++count;
-	    ignored = false;
+	  if (label[i * dim + k * inner_num_ + j] == 1 && k != ignore_label_) {
+	    truth_count++;
 	  }
 	}
-	if (ignored == true) {
-	  for (int c = 0; c < label_num; ++c) {
-	    bottom_diff[i * dim + c * inner_num_ + j] = 0;
+	for (int k = 0; k < label_num; k++) {
+	  bottom_diff[i * dim + k * inner_num_ + j] *= truth_count;
+	  if (label[i * dim + k * inner_num_ + j] == 1 && k != ignore_label_) {
+	    bottom_diff[i * dim + k * inner_num_ + j] -= 1;
+	    ++count;
 	  }
 	}
       }

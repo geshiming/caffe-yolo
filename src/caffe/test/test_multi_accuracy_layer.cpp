@@ -26,6 +26,7 @@ protected:
     shape[0] = 100;
     shape[1] = 10;
     blob_bottom_data_->Reshape(shape);
+    blob_bottom_label_->Reshape(shape);
     FillBottoms();
 
     blob_bottom_vec_.push_back(blob_bottom_data_);
