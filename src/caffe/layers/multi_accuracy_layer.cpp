@@ -62,7 +62,7 @@ void MultiAccuracyLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& bottom,
       }
       for (int c = 0; c < num_labels; ++c) {
 	if (label[i * dim + c * inner_num_ + j] == 1 && c != ignore_label_) {
-	  accuracy += std::min(prob_data[i * dim + c * inner_num_ + j], 1.0 / truth_count);
+	  accuracy += std::min(prob_data[i * dim + c * inner_num_ + j], Dtype(1.0 / truth_count));
 	  valid = true;
 	}
       }
