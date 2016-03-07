@@ -25,6 +25,7 @@ void MultiAccuracyLayer<Dtype>::LayerSetUp(
 
   has_ignore_label_ =
     this->layer_param_.multi_accuracy_param().has_ignore_label();
+  ignore_label_ = -1;
   if (has_ignore_label_) {
     ignore_label_ = this->layer_param_.multi_accuracy_param().ignore_label();
   }
@@ -54,11 +55,19 @@ void MultiAccuracyLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& bottom,
   int count = 0;
   for (int i = 0; i < outer_num_; i++) {
     for (int j = 0; j < inner_num_; j++) {
+      bool valid = false;
+      int truth_count = 0;
+      for (int c = 0; c < num_labels; ++c) {
+	truth_count++;
+      }
       for (int c = 0; c < num_labels; ++c) {
 	if (label[i * dim + c * inner_num_ + j] == 1 && c != ignore_label_) {
-	  accuracy += prob_data[i * dim + c * inner_num_ + j];
-	  count++;
+	  accuracy += std::min(prob_data[i * dim + c * inner_num_ + j], 1.0 / truth_count);
+	  valid = true;
 	}
+      }
+      if (valid == true) {
+	count++;
       }
     }
   }
