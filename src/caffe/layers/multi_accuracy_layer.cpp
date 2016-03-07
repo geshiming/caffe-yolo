@@ -58,7 +58,9 @@ void MultiAccuracyLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& bottom,
       bool valid = false;
       int truth_count = 0;
       for (int c = 0; c < num_labels; ++c) {
-	truth_count++;
+	if (label[i * dim + c * inner_num_ + j] == 1 && c != ignore_label_) {
+	  truth_count++;
+	}
       }
       for (int c = 0; c < num_labels; ++c) {
 	if (label[i * dim + c * inner_num_ + j] == 1 && c != ignore_label_) {
